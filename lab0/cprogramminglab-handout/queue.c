@@ -41,7 +41,7 @@ void q_free(queue_t *q)
   if (q != NULL)
   {
     list_ele_t *oldh = q->head;
-    while(q->head != NULL)
+    while(oldh != NULL)
     {
       free(oldh->value);
       q->head = q->head->next;
@@ -49,9 +49,9 @@ void q_free(queue_t *q)
       oldh = q->head;
     }
     q->back = NULL;
+    /* Free queue structure */
+    free(q);
   }
-  /* Free queue structure */
-  free(q);
 }
 
 
@@ -117,9 +117,9 @@ bool q_insert_tail(queue_t *q, char *s)
     if (newt == NULL)
       return false;
     newt->value = malloc(sizeof(char) * strlen(s)+1);
-    if (newh->value == NULL)
+    if (newt->value == NULL)
     {
-      free(newh);
+      free(newt);
       return false;
     }
 
@@ -136,6 +136,7 @@ bool q_insert_tail(queue_t *q, char *s)
       q->back->next = newt;
       q->back = newt;
     }
+    q->size += 1;
     return true;
 }
 
@@ -150,7 +151,7 @@ bool q_insert_tail(queue_t *q, char *s)
 bool q_remove_head(queue_t *q, char *sp, size_t bufsize)
 {
     /* You need to fix up this code. */
-    if (q == NULL || q->head == q->back)
+    if (q == NULL || q->head == NULL)
       return false;
     if (sp != NULL)
     {
@@ -194,20 +195,24 @@ void q_reverse(queue_t *q)
     /* You need to write the code for this function */
     if (q != NULL) 
     {
-      if (q->head != q->back)
+      if (q->head != NULL)
       {
-        list_ele_t *point_array[q->size];
-        int i;
-        for (i = 0; i <= (q->size - 1); i++)
+        /* not use stack(array) because stack need a lot space */
+        /* one time we only focus on three connected node */
+        list_ele_t *q_tail = q->head;
+        list_ele_t *cur_q_node = q->head->next; 
+        list_ele_t *q_head = q->head->next->next;
+        while (q_head != NULL)
         {
-          point_array[i] = q->head;
-          q->head = q->head->next;
+          cur_q_node->next = q_tail;
+          q_tail = cur_q_node;
+          cur_q_node = q_head;
+          q_head = q_head->next;
         }
-        /*when loop fininsh q->head point to dummy node*/
-        q->head = point_array[q->size -1];
-        for (i = 1; i <= (q->size -1); i++)
-          point_array[i]->next = point_array[i-1];
-        point_array[0]->next = q->back;
+        cur_q_node->next = q_tail;
+        q->back = q->head;
+        q->back->next = NULL;
+        q->head = cur_q_node;
       }
     }
 
