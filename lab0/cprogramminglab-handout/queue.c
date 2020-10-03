@@ -28,7 +28,13 @@ queue_t *q_new()
     /* What if malloc returned NULL? */
     if q == NULL
         return NULL
-    q->head = NULL;
+    list_ele_t *dummy;
+    dummy = malloc(sizeof(list_ele_t));
+    dummy->value = NULL;
+    dummy->next = NULL;
+    q->head = dummy;
+    q->back = dummy;
+    q->size = 0;
     return q;
 }
 
@@ -40,7 +46,7 @@ void q_free(queue_t *q)
     {
       /* code */
       list_ele_t *i = q->head;
-      p->head = i->next;
+      q->head = i->next;
       free(i);
     }
     /* Free queue structure */
@@ -60,7 +66,6 @@ bool q_insert_head(queue_t *q, char *s)
     /* What should you do if the q is NULL? */
     if (q == NULL)
       return false;
-    
     newh = malloc(sizeof(list_ele_t));
     /* Don't forget to allocate space for the string and copy it */
     /* What if either call to malloc returns NULL? */
@@ -69,6 +74,7 @@ bool q_insert_head(queue_t *q, char *s)
     newh->value = s;
     newh->next = q->head;
     q->head = newh;
+    q->size += 1;
     return true;
 }
 
@@ -84,7 +90,19 @@ bool q_insert_tail(queue_t *q, char *s)
 {
     /* You need to write the complete code for this function */
     /* Remember: It should operate in O(1) time */
-    return false;
+    if (q == NULL)
+      return false;
+    list_ele_t *new_dummy;
+    new_dummy = malloc(sizeof(list_ele_t));
+    if (new_dummy == NULL)
+      return false;
+    new_dummy->value = NULL;
+    new_dummy->next = NULL;
+    q->back->value = s;
+    q->back->next = new_dummy;
+    q->back = new_dummy;
+    q->size += 1;
+    return true;
 }
 
 /*
@@ -98,7 +116,14 @@ bool q_insert_tail(queue_t *q, char *s)
 bool q_remove_head(queue_t *q, char *sp, size_t bufsize)
 {
     /* You need to fix up this code. */
+    if (q == NULL || q->head == q->back)
+      return false;
+    strncpy(sp,q->head->value,bufsize-1);
+    sp[bufsize] = NULL;
+    list_ele_t *i = q->head;
     q->head = q->head->next;
+    free(i);
+    q->size -= 1;
     return true;
 }
 
@@ -110,7 +135,7 @@ int q_size(queue_t *q)
 {
     /* You need to write the code for this function */
     /* Remember: It should operate in O(1) time */
-    return 0;
+    return q->size;
 }
 
 /*
@@ -123,5 +148,19 @@ int q_size(queue_t *q)
 void q_reverse(queue_t *q)
 {
     /* You need to write the code for this function */
+    list_ele_t *point_array[q->size];
+    for (int i = 0; i <= (q->size - 1); i++)
+    {
+      point_array[i] = q->head;
+      q->head = q->head->next;
+    }
+    /*when loop fininsh q->head point to dummy node*/
+    q->head = point_array[q->size -1];
+    for (int i = 1; i <= (q->size -1); i++)
+    {
+      point_array[i]->next = point_array[i-1];
+    }
+    point_array[0]->next = q->back;
+    
 }
 
