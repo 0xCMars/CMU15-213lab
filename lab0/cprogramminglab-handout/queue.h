@@ -32,7 +32,6 @@ typedef struct {
     */
    list_ele_t *back;
    int size;
-  
 } queue_t;
 
 /************** Operations on queue ************************/
