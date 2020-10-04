@@ -199,20 +199,18 @@ void q_reverse(queue_t *q)
       {
         /* not use stack(array) because stack need a lot space */
         /* one time we only focus on three connected node */
-        list_ele_t *q_tail = q->head;
-        list_ele_t *cur_q_node = q->head->next; 
-        list_ele_t *q_head = q->head->next->next;
-        while (q_head != NULL)
+        list_ele_t *q_tail = NULL;
+        list_ele_t *cur_q_node = p->head;
+        list_ele_t *q_head = NULL;
+        while (cur_q_node != NULL)
         {
-          cur_q_node->next = q_tail;
+          q_head = cur_q_node->next;
+          cur_q_node-> = q_tail;
           q_tail = cur_q_node;
           cur_q_node = q_head;
-          q_head = q_head->next;
         }
-        cur_q_node->next = q_tail;
         q->back = q->head;
-        q->back->next = NULL;
-        q->head = cur_q_node;
+        q->head = q_tail;
       }
     }
 
