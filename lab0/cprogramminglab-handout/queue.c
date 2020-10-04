@@ -28,6 +28,11 @@ queue_t *q_new()
     /* What if malloc returned NULL? */
     if (q == NULL)
         return NULL;
+    /* two point, one for head one for tail*/
+    /* I try to use a dummy node but the bug cause by this node is tricky */
+    /* I guess that the test case will simulate the fail of mollac */
+    /* when you use a dummy node which need allocate new space, you break the order of command new */
+    /* so when tested by the trace file, it cause some problem. Hope someone will fix this or tell me how to do */
     q->head = NULL;
     q->back = NULL;
     q->size = 0;
@@ -41,8 +46,11 @@ void q_free(queue_t *q)
   if (q != NULL)
   {
     list_ele_t *oldh = q->head;
+    /*use the oldhead pointer to free the queue by removing the head*/
     while(oldh != NULL)
     {
+      /*remember to free the value pointer */
+      /*otherwise it will have bug in the test which show some block still allocate*/
       free(oldh->value);
       q->head = q->head->next;
       free(oldh);
@@ -76,6 +84,7 @@ bool q_insert_head(queue_t *q, char *s)
     /* Don't forget to allocate space for the string and copy it */
     /* Don't forger the last '\0' is not count in strlen, so you have to plus 1 */
     newh->value = malloc(sizeof(char) * strlen(s)+1);
+
     /* What if either call to malloc returns NULL? */
     if (newh->value == NULL)
     {
@@ -126,6 +135,7 @@ bool q_insert_tail(queue_t *q, char *s)
     strcpy(newt->value,s);
     newt->next=NULL;
 
+    /* if the queue is empty, you should point the q->head to the newt */
     if (q->head == NULL)
     {
       q->head = newt;
@@ -153,6 +163,7 @@ bool q_remove_head(queue_t *q, char *sp, size_t bufsize)
     /* You need to fix up this code. */
     if (q == NULL || q->head == NULL)
       return false;
+    /* Don't forget the maximum of cahracters and null terminator*/
     if (sp != NULL)
     {
       strncpy(sp,q->head->value,bufsize-1);
@@ -200,12 +211,12 @@ void q_reverse(queue_t *q)
         /* not use stack(array) because stack need a lot space */
         /* one time we only focus on three connected node */
         list_ele_t *q_tail = NULL;
-        list_ele_t *cur_q_node = p->head;
+        list_ele_t *cur_q_node = q->head;
         list_ele_t *q_head = NULL;
         while (cur_q_node != NULL)
         {
           q_head = cur_q_node->next;
-          cur_q_node-> = q_tail;
+          cur_q_node->next = q_tail;
           q_tail = cur_q_node;
           cur_q_node = q_head;
         }
